@@ -1,9 +1,10 @@
-<template ref="hello">
-    <div class="hello">
-        <div v-if="mode=='view'" :style="'background-image: url('+ profile.imagePrimary +');'">
-            <h5>Display Name: {{ profile.displayName }} <span>{{profile.age}}</span></h5>
-            <p>Description: {{ profile.description }}</p>
-            {{profile.imagePrimary}}
+<template>
+    <div class="container">
+        <div v-if="mode=='view'" class="profile-large" :style="'background-image: url('+ profile.imagePrimary +');'">
+            <h4>{{ profile.displayName }} <span class="age">{{profile.age}}</span></h4>
+            <p class="description">{{ profile.description }}</p>
+            
+            <small>{{profile.imagePrimary}}</small>
             <button v-if="isMyProfile" @click="mode='edit'">Edit</button>
         </div>
         <div v-if="mode=='edit'">
@@ -179,8 +180,32 @@ export default {
     }
 }
 </script>
-<style>
+<style scoped>
 label {
     display: block;
+}
+
+.profile-large {
+    background-size: cover;
+    background-position: center center;
+    text-align: left;
+}
+
+.container,
+.profile-large {
+    height: 100%;
+}
+
+.profile-large {
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 1rem;
+}
+
+.age{font-weight: normal;}
+.description{
+  margin-top: 1rem;
 }
 </style>

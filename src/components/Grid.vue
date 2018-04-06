@@ -2,7 +2,8 @@
     <div id="grid">
         <div v-for="profile in profilesOrdered" :key="profile.key" class="profile" :class="[profile.uid == currentUser.uid ?  'me' : '']" :style="'background-image: url('+ profile.imagePrimary +');'">
             <router-link :to="'/profile/'+profile.uid">
-                <div class="displayname">{{profile.displayName}}</div> | {{profile.distance | kmToFeet}}
+                {{profile.distance | kmToFeet}}
+                <div class="displayname">{{profile.displayName}}</div>
             </router-link>
         </div>
     </div>
@@ -12,13 +13,15 @@ function log(val) {
     console.log(val);
 }
 
+var geoQueryGuyWatcher;
+
 export default {
     name: 'Grid',
     data: function() {
         return {
             profiles: {},
             latlon: '',
-            store: store
+            store: store,
         }
     },
     computed: {
@@ -92,28 +95,37 @@ export default {
             var profilesRef = firebase.database().ref('profiles/' + profileToLookup + '');
             self = this;
             profilesRef.on('value', function(snapshot) {
+                if (!snapshot.val()) {
+                    console.log('null data for ', self.profiles[snapshot.ref.key]);
+                    return;
+                }
                 console.log('data', snapshot.val());
-                self.profiles[snapshot.ref.key] = Object.assign({}, self.profiles[snapshot.ref.key], snapshot.val())
+                // self.profiles[snapshot.ref.key] = Object.assign({}, self.profiles[snapshot.ref.key], snapshot.val())
+                var mergedData = Object.assign({}, self.profiles[snapshot.ref.key], snapshot.val());
+                //debugger;
+                Vue.set(self.profiles, snapshot.ref.key, mergedData)
             });
         },
         init: function() {
             var center = store.location || [0, 0];
+            var self = this;
 
             geoQuery = geoFire.query({
                 center: center,
                 radius: 100.5
             });
 
-            var self = this;
-            var gridGuy = geoQuery.on("key_entered", (key, location, distance) => {
+
+            geoQueryGuyWatcher = geoQuery.on("key_entered", (key, location, distance) => {
                 console.log("Bicycle shop " + key + " found at " + location + " (" + distance + " km away)");
                 Vue.set(self.profiles, key, {
                     distance: distance,
                     uid: key
                 });
-                var profileToLookup = key;
-                self.getProfileInfo(profileToLookup);
+                self.getProfileInfo(key);
             });
+            console.log('set a watcher');
+
 
             geoQuery.on("key_exited", function(key, location, distance) {
                 console.log(key + " exited query to " + location + " (" + distance + " km from center)");
@@ -124,20 +136,26 @@ export default {
 
         }
     },
-    mounted: function() {
-        this.$nextTick(function() {
-            // Code that will run only after the
-            // entire view has been rendered
-            //this.getLocation();
-            this.init();
+    created: function() {
+        console.log('mounted');
+
+         this.init();
             this.getLocation();
-        })
+
+            
     },
-    filters:{
-        kmToFeet: function (km) {
-        if (!km) return '0 ft';
-        return Math.round(km * 3280.8) + 'ft';
-      }
+    destroyed: function() {
+        // geoQueryGuyWatcher.cancel();
+        // debugger;
+        console.log('destorying', geoQueryGuyWatcher);
+        geoQueryGuyWatcher.cancel();
+
+    },
+    filters: {
+        kmToFeet: function(km) {
+            if (!km) return '0 ft';
+            return Math.round(km * 3280.8) + 'ft';
+        }
     }
 }
 </script>
@@ -169,10 +187,16 @@ export default {
     color: #fff;
     text-decoration: none;
     height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
-a.displayname {
+.displayname {
     text-shadow: 1px solid #000;
     text-decoration: none;
+    font-weight: bold;
+    font-size: .75rem;
+    align-self: flex-start;
 }
 </style>

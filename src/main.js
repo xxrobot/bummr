@@ -38,10 +38,22 @@ window.geoFire = new GeoFire(geofireRef);
 window.firebase = firebase;
 window.geoQuery ='';
 
+
+
+    /* eslint-disable no-new */
+    // window.app = new Vue({
+    //   el: '#app',
+    //   template: '<App/>',
+    //   components: { App },
+    //   router
+    // })
+
+
 firebase.auth().onAuthStateChanged(function(user) {
+ // debugger;
   if (!app) {
     /* eslint-disable no-new */
-    window.app = new Vue({
+    app = new Vue({
       el: '#app',
       template: '<App/>',
       components: { App },
