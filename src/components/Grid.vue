@@ -1,27 +1,35 @@
 <template>
     <div id="grid">
-        <router-link :to="'/profile/'+profile.key" v-for="profile in orderBy(profiles, 'distance')" class="profile" :style="'background-image: url('+ profile.imagePrimary +');'">
-            {{profile.displayName}} {{profile.key}} | {{profile.distance}} km
-        </router-link>
+        <div v-for="profile in profilesOrdered" :key="profile.key" class="profile" :class="[profile.uid == currentUser.uid ?  'me' : '']" :style="'background-image: url('+ profile.imagePrimary +');'">
+            <router-link :to="'/profile/'+profile.uid">
+                <div class="displayname">{{profile.displayName}}</div> | {{profile.distance | kmToFeet}}
+            </router-link>
+        </div>
     </div>
 </template>
 <script>
 function log(val) {
     console.log(val);
 }
-//import firebase from 'firebase'
-
 
 export default {
     name: 'Grid',
     data: function() {
         return {
-            profiles: [],
-            latlon: ''
+            profiles: {},
+            latlon: '',
+            store: store
+        }
+    },
+    computed: {
+        profilesOrdered: function() {
+            return _.orderBy(this.profiles, ['distance'])
+        },
+        currentUser: function() {
+            return firebase.auth().currentUser
         }
     },
     methods: {
-
         getLocation: function() {
             if (typeof navigator !== "undefined" && typeof navigator.geolocation !== "undefined") {
                 log("Asking user to get their location");
@@ -39,6 +47,8 @@ export default {
             var latitude = location.coords.latitude;
             var longitude = location.coords.longitude;
             log("Retrieved user's location: [" + latitude + ", " + longitude + "]");
+
+            store.location = [latitude, longitude];
             this.updateCenter([latitude, longitude]);
 
             // var username = "wesley";
@@ -56,38 +66,15 @@ export default {
                 //sometimes this error when it's removing at setting at the same time
             });
         },
-        updateCenter: function(centerLatLon, radius) {
-            log('updating center to: ', centerLatLon);
-            var vm = this;
-
-            //centerLatLon is an array [10.38, 3.41]
-            // radius is in km
-            var geoQuery = geoFire.query({
-                center: centerLatLon,
-                radius: 100.5
-            });
-
-            function addProfile(profile) {
-                //profiles.push(profile);
+        updateCenter: function(center, radius) {
+            if (!center) {
                 debugger;
             }
-
-            //These fire for every guy in the radius
-            var self = this;
-            var hello = geoQuery.on("key_entered", (key, location, distance, vm) => {
-                console.log("Bicycle shop " + key + " found at " + location + " (" + distance + " km away)");
-                self.profiles.push({
-                    key: key,
-                    distance: distance
-                });
-                var profileToLookup = key;
-                self.getProfileInfo(profileToLookup);
+            console.log('updating center to: ', center);
+            geoQuery.updateCriteria({
+                center: center,
+                radius: 100
             });
-
-            geoQuery.on("key_exited", function(key, location, distance) {
-                console.log(key + " exited query to " + location + " (" + distance + " km from center)");
-            });
-
         },
         errorHandler: function(error) {
             if (error.code == 1) {
@@ -105,22 +92,60 @@ export default {
             var profilesRef = firebase.database().ref('profiles/' + profileToLookup + '');
             self = this;
             profilesRef.on('value', function(snapshot) {
-                // Find where in array the key is
-                var index = self.profiles.map(function(e) { return e.key; }).indexOf(profileToLookup);
-                self.profiles[index] = {...snapshot.val()};
+                console.log('data', snapshot.val());
+                self.profiles[snapshot.ref.key] = Object.assign({}, self.profiles[snapshot.ref.key], snapshot.val())
             });
+        },
+        init: function() {
+            var center = store.location || [0, 0];
+
+            geoQuery = geoFire.query({
+                center: center,
+                radius: 100.5
+            });
+
+            var self = this;
+            var gridGuy = geoQuery.on("key_entered", (key, location, distance) => {
+                console.log("Bicycle shop " + key + " found at " + location + " (" + distance + " km away)");
+                Vue.set(self.profiles, key, {
+                    distance: distance,
+                    uid: key
+                });
+                var profileToLookup = key;
+                self.getProfileInfo(profileToLookup);
+            });
+
+            geoQuery.on("key_exited", function(key, location, distance) {
+                console.log(key + " exited query to " + location + " (" + distance + " km from center)");
+                Vue.delete(self.profiles, key);
+            });
+
+
+
         }
     },
     mounted: function() {
         this.$nextTick(function() {
             // Code that will run only after the
             // entire view has been rendered
+            //this.getLocation();
+            this.init();
             this.getLocation();
         })
+    },
+    filters:{
+        kmToFeet: function (km) {
+        if (!km) return '0 ft';
+        return Math.round(km * 3280.8) + 'ft';
+      }
     }
 }
 </script>
 <style scoped>
+.grid {
+    margin: -.25rem;
+}
+
 .profile {
     display: inline-block;
     height: 100px;
@@ -129,8 +154,25 @@ export default {
     background-color: #111;
     background-size: cover;
     background-repeat: no-repeat;
-    border-radius: 2px;
+    border-radius: .5rem;
+    padding: .5rem;
+    margin: .25rem;
+    box-sizing: border-box;
+}
+
+.me {
+    border: 2px solid yellow;
+}
+
+.profile a {
+    display: block;
     color: #fff;
+    text-decoration: none;
+    height: 100%;
+}
+
+a.displayname {
     text-shadow: 1px solid #000;
+    text-decoration: none;
 }
 </style>

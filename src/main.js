@@ -5,10 +5,13 @@ import App from './App'
 import router from './router'
 import firebase from 'firebase'
 import Vue2Filters from 'vue2-filters'
+import lodash from 'lodash'
 
 window.Vue = Vue;
 
 Vue.use(Vue2Filters);
+Vue.prototype.$_ = lodash;
+
 
 Vue.config.productionTip = false
 
@@ -33,6 +36,7 @@ window.geofireRef = firebase.database().ref(config.geofireDB);
 // TODO: remove from window in prod
 window.geoFire = new GeoFire(geofireRef);
 window.firebase = firebase;
+window.geoQuery ='';
 
 firebase.auth().onAuthStateChanged(function(user) {
   if (!app) {
