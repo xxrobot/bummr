@@ -8,7 +8,7 @@
             </div>
         </div>
         <form @submit.prevent="sendMessage" class="text-container">
-            <input type="text" v-model="myMessage">
+            <input type="text" v-model="myMessage" class="text-input">
             <button>Send</button>
         </form>
     </div>
@@ -95,14 +95,17 @@ export default {
             console.log(this.conversationid);
             firebase.database().ref('conversations/' + this.conversationid).update({
                 members: [this.currentUser.uid, this.id],
-                lastMessageTime: Date.now()
+                lastMessageTime: Date.now(),
+                lastMessage: self.myMessage
             });
 
             firebase.database().ref('conversations/' + this.conversationid + '/messages/').push({
                 text: self.myMessage,
                 createdAt: Date.now(),
                 sender: this.currentUser.uid
-            })
+            });
+
+            self.myMessage = '';
 
         },
         getMessages: function() {
@@ -190,40 +193,41 @@ export default {
         })
     },
     watch: {
-        // $route(to, from) {
-        //     if (this.id) {
-        //         this.getProfileInfo(this.id);
-        //     } else {
-        //         this.getProfileInfo(this.currentUser.uid);
-        //     }
-        // }
+        $route(to, from) {
+            this.getConversationId();
+        }
     }
 }
 </script>
 <style scoped>
-
 .container,
 .profile-large {
     height: 100%;
 }
 
-.container{
+.container {
     display: flex;
     flex-direction: column;
 }
 
-.text-container{display: flex;}
-
-.text-input{    flex-grow: 1;}
-.messages{
+.text-container {
     display: flex;
+}
+
+.text-input {
+    flex-grow: 1;
+}
+
+.messages {
+    display: flex;
+    flex-grow: 1;
     flex-direction: column;
     overflow-x: auto;
 }
 
 .message {
     border-radius: .5rem;
-    background-color: peachpuff;
+    background-color: #9cd3fb;
     color: black;
     margin: .25rem;
     max-width: 80vw;
@@ -231,7 +235,7 @@ export default {
     padding: .5rem 1rem;
 }
 
-.message .me {
+.message.me {
     background-color: orangered;
     align-self: flex-end;
 }

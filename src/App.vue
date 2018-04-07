@@ -4,6 +4,7 @@
         <nav>
         <router-link to="/Hello">Home</router-link>
         <router-link to="/profile">My Profile</router-link>
+        <router-link to="/conversations">Conversations</router-link>
       </nav>
     </div>
 </template>
