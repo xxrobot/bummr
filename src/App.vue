@@ -143,6 +143,7 @@ nav {
     width: 100%;
     display: flex;
     justify-content: space-around;
+    z-index: 900;
 }
 
 nav a, nav a:visited{
@@ -151,14 +152,14 @@ nav a, nav a:visited{
   padding: 1rem;
 }
 
-nav a.router-link-active{
+nav a.router-link-active, .active{
     color: #ffba3b;
 }
 
 button{
   padding: 1rem;
   background-color: #ffba3b;
-  border: 1px solid #ccc;
+  border: 1px solid #000;
 }
 
 

@@ -98,5 +98,8 @@ export default {
     width: 100px;
     height: 100px;
     flex-shrink: 0;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center center;
 }
 </style>

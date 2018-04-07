@@ -2,8 +2,13 @@
     <div class="container">
         <div v-if="mode=='view'" class="profile-large" :style="'background-image: url('+ profile.imagePrimary +');'">
             <div class="profile-content">
-                <h4>{{ profile.displayName }} <span class="age">{{profile.age}}</span></h4>
-                <p class="description">{{ profile.description }}</p>
+                <div class="profile-top">
+                    <a @click="addToFavorites" :class="[isFavorite ?  'active' : '']"><span class="fas fa-star" alt="Add to Favorites" ></span></a>
+                </div>
+                <div class="profile-bottom">
+                    <h4>{{ profile.displayName }} <span class="age">{{profile.age}}</span></h4>
+                    <p class="description">{{ profile.description }}</p>
+                </div>
                 <div class="fab-container">
                     <router-link :to="'../chat/'+id" class="fab" tag="button"><span class="fas fa-comment-alt"></span></router-link>
                     <button class="fab" v-if="isMyProfile" @click="mode='edit'"><span class="fas fa-pencil-alt"></span></button>
@@ -51,6 +56,9 @@ export default {
             description: '',
             age: '',
             imageUrl: '',
+            imagePrimary: '',
+            favorites: {},
+            isFavorite: false,
             profile: {
                 displayName: '',
                 description: '',
@@ -58,7 +66,7 @@ export default {
                 imageUrl: '',
                 imagePrimary: ''
             },
-            imagePrimary: ''
+
         }
     },
     computed: {
@@ -77,6 +85,19 @@ export default {
         }
     },
     methods: {
+        findKey: function(obj, value) {
+
+            var key;
+
+            _.each(obj, function(v, k) {
+                if (v === value) {
+                    key = k;
+                }
+            });
+
+            return key;
+
+        },
         writeUserData: function() {
             firebase.database().ref('profiles/' + this.currentUser.uid).set({
                 displayName: this.profile.displayName || '',
@@ -86,6 +107,25 @@ export default {
             });
             console.log('Wrote user data for ', this.currentUser.uid);
             this.mode = 'view';
+        },
+        addToFavorites: function() {
+            firebase.database().ref('users/' + this.currentUser.uid + '/favorites').push(
+                this.id
+            );
+            console.log('Add user ' + this.id + ' to favorites for ', this.currentUser.uid);
+        },
+        getFavorites: function() {
+            var profilesRef = firebase.database().ref('users/' + this.currentUser.uid + '/favorites');
+            self = this;
+            profilesRef.on('value', function(snapshot) {
+                self.favorites = Object.assign(self.favorites, snapshot.val());
+
+                //Update the star
+                self.findKey(self.favorites, self.id);
+                if (self.findKey(self.favorites, self.id)) {
+                    self.isFavorite = true;
+                }
+            });
         },
         getProfileInfo: function(profileToLookup) {
             console.log('looking up profile: ', profileToLookup);
@@ -172,7 +212,7 @@ export default {
             } else {
                 this.getProfileInfo(this.currentUser.uid);
             }
-
+            this.getFavorites();
         })
     },
     watch: {
@@ -204,12 +244,15 @@ label {
     color: white;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
     padding: 0 .5rem 4rem;
 }
 
 .profile-content {
     z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    flex-grow: 1;
 }
 
 .profile-large:after {
@@ -235,5 +278,14 @@ label {
 
 .fab-hollow {
     background: transparent;
+}
+
+.profile-top {
+    text-align: right;
+}
+
+.profile-top a {
+    padding: 1rem;
+    display: block;
 }
 </style>

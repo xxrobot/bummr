@@ -166,15 +166,15 @@ export default {
 
 .profile {
     display: inline-block;
-    height: 100px;
-    width: 100px;
+    height: calc(33vw - 0.25rem);
+    width: calc(33vw - 0.25rem);
     overflow: hidden;
     background-color: #111;
     background-size: cover;
     background-repeat: no-repeat;
-    border-radius: .5rem;
+    border-radius: .25rem;
     padding: .25rem .5rem ;
-    margin: .25rem;
+    margin: .125rem;
     box-sizing: border-box;
 }
 
