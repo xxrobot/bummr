@@ -200,18 +200,11 @@ export default {
 }
 </script>
 <style scoped>
-.container,
-.profile-large {
-    height: 100%;
-}
-
-.container {
-    display: flex;
-    flex-direction: column;
-}
-
 .text-container {
     display: flex;
+    position: fixed;
+    bottom: 3.5rem;
+    width: 100%;
 }
 
 .text-input {
@@ -223,6 +216,7 @@ export default {
     flex-grow: 1;
     flex-direction: column;
     overflow-x: auto;
+    padding-bottom: 4rem;
 }
 
 .message {

@@ -1,13 +1,14 @@
 <template>
     <div class="container">
         <div v-if="mode=='view'" class="profile-large" :style="'background-image: url('+ profile.imagePrimary +');'">
-            <h4>{{ profile.displayName }} <span class="age">{{profile.age}}</span></h4>
-            <p class="description">{{ profile.description }}</p>
-            <router-link :to="'../chat/'+id">Chat</router-link>
-
-            
-            <small>{{profile.imagePrimary}}</small>
-            <button v-if="isMyProfile" @click="mode='edit'">Edit</button>
+            <div class="profile-content">
+                <h4>{{ profile.displayName }} <span class="age">{{profile.age}}</span></h4>
+                <p class="description">{{ profile.description }}</p>
+                <div class="fab-container">
+                    <router-link :to="'../chat/'+id" class="fab" tag="button"><span class="fas fa-comment-alt"></span></router-link>
+                    <button class="fab" v-if="isMyProfile" @click="mode='edit'"><span class="fas fa-pencil-alt"></span></button>
+                </div>
+            </div>
         </div>
         <div v-if="mode=='edit'">
             <!-- show My profile -->
@@ -71,8 +72,8 @@ export default {
         currentUser: function() {
             return firebase.auth().currentUser
         },
-        targetProfile: function(){
-          return this.id;
+        targetProfile: function() {
+            return this.id;
         }
     },
     methods: {
@@ -190,27 +191,49 @@ label {
     display: block;
 }
 
+.container {
+    padding-bottom: 0
+}
+
 .profile-large {
     background-size: cover;
     background-position: center center;
     text-align: left;
-}
-
-.container,
-.profile-large {
-    height: 100%;
-}
-
-.profile-large {
+    height: 100vh;
+    padding-bottom: 4rem;
     color: white;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    padding: 1rem;
+    padding: 0 .5rem 4rem;
 }
 
-.age{font-weight: normal;}
-.description{
-  margin-top: 1rem;
+.profile-content {
+    z-index: 10;
+}
+
+.profile-large:after {
+    background: linear-gradient(35deg, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0) 40%);
+    box-sizing: border-box;
+    padding-bottom: 60px;
+    pointer-events: none;
+    content: '';
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    position: absolute;
+}
+
+.age {
+    font-weight: normal;
+}
+
+.description {
+    margin-top: 1rem;
+}
+
+.fab-hollow {
+    background: transparent;
 }
 </style>

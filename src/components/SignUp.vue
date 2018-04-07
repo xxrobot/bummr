@@ -27,7 +27,7 @@ export default {
         signUp: function() {
             firebase.auth().createUserWithEmailAndPassword(this.email, this.password).then(
                 (user) => {
-                  this.writeUserData(user.uid);
+                    this.writeUserData(user.uid);
                     this.$router.replace('hello')
                 },
                 (err) => {
@@ -49,19 +49,21 @@ export default {
 </script>
 <style scoped>
 .signUp {
-    margin-top: 40px;
+    padding-top: 40px;
 }
 
 input {
     margin: 10px 0;
-    width: 20%;
+    width: 80%;
     padding: 15px;
+    max-width: 18rem;
 }
 
 button {
-    margin-top: 10px;
-    width: 10%;
+    margin-top: 20px;
+    width: 80%;
     cursor: pointer;
+    max-width: 18rem;
 }
 
 span {

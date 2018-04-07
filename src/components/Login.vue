@@ -40,13 +40,16 @@
   }
   input {
     margin: 10px 0;
-    width: 20%;
+    width: 80%;
     padding: 15px;
+    max-width: 18rem;
+
   }
   button {
     margin-top: 20px;
-    width: 10%;
+    width: 80%;
     cursor: pointer;
+    max-width: 18rem;
   }
   p {
     margin-top: 40px;

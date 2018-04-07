@@ -2,9 +2,10 @@
     <div id="app">
         <router-view></router-view>
         <nav>
-        <router-link to="/Hello">Home</router-link>
+        <router-link to="/Hello"><span class="fas fa-th" alt="Grid"></span></router-link>
         <router-link to="/profile">My Profile</router-link>
-        <router-link to="/conversations">Conversations</router-link>
+        <router-link to="/conversations"><span class="fas fa-comment-alt" alt="Messages"></span></router-link>
+        <router-link to="/favorites"><span class="fas fa-star" alt="favorites"></span></router-link>
       </nav>
     </div>
 </template>
@@ -113,8 +114,8 @@ input, select {
 }
 /*end reset*/
 *{box-sizing: border-box;}
-html{height: 100%}
-body{height: calc(100% - 56px);
+
+body{
 background-color: #151515;
 color: #fff;}
 
@@ -126,27 +127,57 @@ a, a:visited{
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-align: center;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
 
-    height: 100%;
+.container{
+    padding-bottom: 4rem;
 }
 
 nav {
-    background: #ccc;
-    padding: 1rem;
+    background: #000;
     position: fixed;
     bottom: 0;
     width: 100%;
+    display: flex;
+    justify-content: space-around;
 }
-
 
 nav a, nav a:visited{
   text-decoration: none;
-  color: #000;
+  color: #999;
+  padding: 1rem;
+}
+
+nav a.router-link-active{
+    color: #ffba3b;
 }
 
 button{
   padding: 1rem;
   background-color: #ffba3b;
   border: 1px solid #ccc;
+}
+
+
+.fab-container {
+    position: absolute;
+    right: 1rem;
+    bottom: 4.5rem;
+    display: flex;
+    flex-direction: column;
+    margin: 0 -.25rem;
+}
+
+.fab {
+    border-radius: 50%;
+    width: 3rem;
+    height: 3rem;
+    line-height: 0;
+    padding: 0;
+    font-size: 1rem;
+    margin: .25rem;
 }
 </style>
