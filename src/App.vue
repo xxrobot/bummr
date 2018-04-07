@@ -113,7 +113,7 @@ input, select {
 /*end reset*/
 *{box-sizing: border-box;}
 html{height: 100%}
-body{height: calc(100% - 50px);
+body{height: calc(100% - 56px);
 background-color: #151515;
 color: #fff;}
 

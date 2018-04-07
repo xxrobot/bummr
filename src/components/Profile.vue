@@ -3,6 +3,8 @@
         <div v-if="mode=='view'" class="profile-large" :style="'background-image: url('+ profile.imagePrimary +');'">
             <h4>{{ profile.displayName }} <span class="age">{{profile.age}}</span></h4>
             <p class="description">{{ profile.description }}</p>
+            <router-link :to="'../chat/'+id">Chat</router-link>
+
             
             <small>{{profile.imagePrimary}}</small>
             <button v-if="isMyProfile" @click="mode='edit'">Edit</button>
@@ -68,6 +70,9 @@ export default {
         },
         currentUser: function() {
             return firebase.auth().currentUser
+        },
+        targetProfile: function(){
+          return this.id;
         }
     },
     methods: {

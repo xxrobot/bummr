@@ -12,7 +12,6 @@ window.Vue = Vue;
 Vue.use(Vue2Filters);
 Vue.prototype.$_ = lodash;
 
-
 Vue.config.productionTip = false
 
 let app;
@@ -37,17 +36,6 @@ window.geofireRef = firebase.database().ref(config.geofireDB);
 window.geoFire = new GeoFire(geofireRef);
 window.firebase = firebase;
 window.geoQuery ='';
-
-
-
-    /* eslint-disable no-new */
-    // window.app = new Vue({
-    //   el: '#app',
-    //   template: '<App/>',
-    //   components: { App },
-    //   router
-    // })
-
 
 firebase.auth().onAuthStateChanged(function(user) {
  // debugger;

@@ -5,6 +5,7 @@ import Hello from '@/components/Hello'
 import Login from '@/components/Login'
 import SignUp from '@/components/SignUp'
 import Profile from '@/components/Profile'
+import Chat from '@/components/Chat'
 import firebase from 'firebase'
 
 Vue.use(Router)
@@ -47,8 +48,15 @@ let router = new Router({
     },
     {
       path: '/profile/:id',
-      // name: 'Profile',
       component: Profile,
+      props: true,
+      meta: {
+        requiresAuth: true
+      }
+    },
+    {
+      path: '/chat/:id',
+      component: Chat,
       props: true,
       meta: {
         requiresAuth: true
