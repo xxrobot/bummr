@@ -2,7 +2,7 @@
     <div class="grid">
         <div v-for="profile in profilesOrdered" :key="profile.key" class="profile" :class="[profile.uid == currentUser.uid ?  'me' : '']" :style="'background-image: url('+ profile.imagePrimary +');'">
             <router-link :to="'/profile/'+profile.uid">
-                {{profile.distance | kmToFeet}}
+                {{profile.distance | kmToDistance}}
                 <div class="displayname">{{profile.displayName}}</div>
             </router-link>
         </div>
@@ -152,9 +152,15 @@ export default {
 
     },
     filters: {
-        kmToFeet: function(km) {
+        kmToDistance: function(km) {
             if (!km) return '0 ft';
-            return Math.round(km * 3280.8) + 'ft';
+
+            if(km <= 1.60934){
+                return Math.round(km * 3280.8) + 'ft';
+            }else{
+                return Math.round(km * 0.621371) + 'mi';
+            }
+            
         }
     }
 }
@@ -164,7 +170,7 @@ export default {
     margin: 0;
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
+    justify-content: flex-start;
 }
 
 .profile {
@@ -181,8 +187,8 @@ export default {
     box-sizing: border-box;
 }
 
-.me {
-    border: 2px solid yellow;
+.profile.me {
+    border: 2px solid #ffba3b;
     order: -1;
 }
 
@@ -197,7 +203,7 @@ export default {
 }
 
 .displayname {
-    text-shadow: 1px solid #000;
+    text-shadow: 0px 1px 1px rgba(0, 0, 0, 0.75);
     text-decoration: none;
     font-weight: bold;
     font-size: .75rem;

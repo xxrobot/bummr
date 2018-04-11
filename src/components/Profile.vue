@@ -16,31 +16,28 @@
             </div>
         </div>
         <div v-if="mode=='edit'">
-            <!-- show My profile -->
-            <!--             My Profile
-            <h5>Display Name: {{ profile.displayName }} <span>{{profile.age}}</span></h5>
-            <p>Description: {{ profile.description }}</p>
-            <small>UID: {{currentUser.uid}}</small>
-            <hr> Edit Profile -->
             <form v-if="mode=='edit'">
+                <br>
                 <div>
-                    <label>Display Name</label>
-                    <input type="text" v-model="profile.displayName">
+                    <label for="displayName">Display Name</label>
+                    <input type="text" v-model="profile.displayName" id="displayName">
                 </div>
                 <div>
-                    <label>Age</label>
-                    <input type="number" v-model="profile.age">
+                    <label for="age">Age</label>
+                    <input type="number" v-model="profile.age" id="age">
                 </div>
                 <div>
-                    <label>Description</label>
-                    <textarea v-model="profile.description">{{ profile.description }}</textarea>
+                    <label for="description">Description</label>
+                    <textarea id="description" v-model="profile.description">{{ profile.description }}</textarea>
                 </div>
                 <button @click="writeUserData">Save</button>
             </form>
             <button v-if="isMyProfile" @click="mode='upload'">Upload Photo</button>
         </div>
         <form v-if="mode=='upload'">
-            <input type="file" @change="onFileChange">
+            <br>
+            <label for="fileinput">Upload a Photo</label>
+            <input type="file" @change="onFileChange" id="fileinput">
             <button>Upload Image</button>
         </form>
     </div>
@@ -261,6 +258,18 @@ label {
 .container {
     padding-bottom: 0
 }
+
+input[type="text"], input[type="number"], input[type="tel"], input[type="file"], textarea{
+    height: 3rem;
+    min-width: 320px;
+    border: 0;
+    background-color: #111;
+    color: #fff;
+    padding: .5rem;
+    font-size: 1rem;
+}
+
+textarea{min-height: 8rem}
 
 .profile-large {
     background-size: cover;
