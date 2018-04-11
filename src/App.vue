@@ -1,11 +1,13 @@
 <template>
     <div id="app">
-        <router-view></router-view>
+        <transition name="fade">
+            <router-view></router-view>
+        </transition>
         <nav>
-        <router-link to="/Hello"><span class="fas fa-th" alt="Grid"></span></router-link>
-        <router-link to="/profile">My Profile</router-link>
-        <router-link to="/conversations"><span class="fas fa-comment-alt" alt="Messages"></span></router-link>
-        <router-link to="/favorites"><span class="fas fa-star" alt="favorites"></span></router-link>
+            <router-link to="/Hello"><span class="fas fa-th" alt="Grid"></span></router-link>
+            <router-link to="/profile">My Profile</router-link>
+            <router-link to="/conversations"><span class="fas fa-comment-alt" alt="Messages"></span></router-link>
+            <router-link to="/favorites"><span class="fas fa-star" alt="favorites"></span></router-link>
       </nav>
     </div>
 </template>
@@ -134,6 +136,19 @@ a, a:visited{
 
 .container{
     padding-bottom: 4rem;
+}
+
+/*Transitions*/
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.25s ease-out;
+}
+
+.fade-enter, .fade-leave-to {
+  opacity: 0;
+}
+
+::-webkit-scrollbar { 
+    display: none; 
 }
 
 nav {

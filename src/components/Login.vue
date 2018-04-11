@@ -43,7 +43,6 @@
     width: 80%;
     padding: 15px;
     max-width: 18rem;
-
   }
   button {
     margin-top: 20px;

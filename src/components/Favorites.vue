@@ -1,5 +1,5 @@
 <template>
-    <div id="grid">
+    <div class="grid">
         <div v-for="profile in profilesOrdered" :key="profile.key" class="profile" :class="[profile.uid == currentUser.uid ?  'me' : '']" :style="'background-image: url('+ profile.imagePrimary +');'">
             <router-link :to="'/profile/'+profile.uid">
                 {{profile.distance | kmToFeet}}
@@ -159,27 +159,31 @@ export default {
     }
 }
 </script>
-<style scoped>
+<style>
 .grid {
-    margin: -.25rem;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .profile {
-    display: inline-block;
-    height: 100px;
-    width: 100px;
+    display: block;
+    height: calc(33.33332vw - 0.25rem);
+    width: calc(33.33332vw - 0.25rem);
     overflow: hidden;
     background-color: #111;
     background-size: cover;
     background-repeat: no-repeat;
-    border-radius: .5rem;
+    border-radius: .25rem;
     padding: .25rem .5rem ;
-    margin: .25rem;
+    margin: .125rem;
     box-sizing: border-box;
 }
 
 .me {
     border: 2px solid yellow;
+    order: -1;
 }
 
 .profile a {

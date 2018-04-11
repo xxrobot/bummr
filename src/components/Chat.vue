@@ -1,5 +1,5 @@
 <template>
-    <div class="container">
+    <div class="container" id="messages">
         cid: {{conversationid}}
         <br> Chat from: {{currentUser.uid}} to: {{id}}
         <div class="messages">
@@ -22,7 +22,8 @@ export default {
             imagePrimary: '',
             myMessage: '',
             conversationid: '',
-            messages: ''
+            messages: '',
+            scrolled: false
         }
     },
     computed: {
@@ -106,6 +107,7 @@ export default {
             });
 
             self.myMessage = '';
+            self.updateScroll();
 
         },
         getMessages: function() {
@@ -115,7 +117,15 @@ export default {
                 console.log('Getting messages ', snapshot.val());
 
                 self.messages = snapshot.val();
+                self.updateScroll();
             });
+        },
+        updateScroll: function() {
+            if (!this.scrolled) {
+                var element = document.querySelectorAll('body');
+                element.scrollTop = element.scrollHeight;
+
+            }
         },
         onFileChange(e) {
             var files = e.target.files || e.dataTransfer.files;
@@ -189,6 +199,9 @@ export default {
             // } else {
             //     this.getProfileInfo(this.currentUser.uid);
             // }
+            document.addEventListener('scroll', function() {
+                this.scrolled = true;
+            });
 
         })
     },
