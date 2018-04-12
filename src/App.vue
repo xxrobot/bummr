@@ -19,7 +19,11 @@ export default {
     name: 'app',
     data() {
         return {
-            unread: 0
+            unread: 0,
+            data: {
+                favorites: {}
+            },
+            favoritesLoaded: false
         }
     },
     computed: {
@@ -41,12 +45,27 @@ export default {
                 // debugger;
             });  
         },
+        watchFavorites: function() {
+            console.log('getting favorites');
+            var favRef = firebase.database().ref('users/' + this.currentUser.uid + '/favorites');
+            var vm = this;
+            favRef.on('child_added', function(snapshot) {
+                vm.$set(vm.data.favorites, snapshot.key, snapshot.val());
+                vm.favoritesLoaded = true;
+            });
+
+            favRef.on('child_removed', function(snapshot) {
+                // vm.$set(vm.data.favorites, snapshot.key, false);
+                vm.$delete(vm.data.favorites, snapshot.key);
+            });
+        },
         updateUnread: function(number){
             this.unread = number;
         }       
     },
     mounted: function(){
         this.getUnread();
+        this.watchFavorites();
     }
 }
 

@@ -1,6 +1,6 @@
 <template>
-    <div class="grid">
-        <div v-for="profile in profilesOrdered" :key="profile.key" class="profile" :class="[profile.uid == currentUser.uid ?  'me' : '']" :style="'background-image: url('+ profile.imagePrimary +');'">
+    <div class="grid">F: {{fav}}
+        <div v-for="profile in fav" :key="profile.key" class="profile" :class="[profile.uid == currentUser.uid ?  'me' : '']" :style="'background-image: url('+ profile.imagePrimary +');'">
             <router-link :to="'/profile/'+profile.uid">
                 {{profile.distance | kmToFeet}}
                 <div class="displayname">{{profile.displayName}}</div>
@@ -17,11 +17,12 @@ var geoQueryGuyWatcher;
 
 export default {
     name: 'Grid',
+    props: ['favorites'],
     data: function() {
         return {
-            profiles: {},
-            latlon: '',
+            profiles: this.$parent.data.favorites,
             store: store,
+            fav: this.$parent.data.favorites
         }
     },
     computed: {
@@ -33,63 +34,63 @@ export default {
         }
     },
     methods: {
-        getLocation: function() {
-            if (typeof navigator !== "undefined" && typeof navigator.geolocation !== "undefined") {
-                log("Asking user to get their location");
-                navigator.geolocation.getCurrentPosition(position => {
-                        this.geolocationCallback(position)
-                    },
-                    error => {
-                        this.errorHandler(error)
-                    });
-            } else {
-                log("Your browser does not support the HTML5 Geolocation API, so this demo will not work.")
-            }
-        },
-        geolocationCallback: function(location) {
-            var latitude = location.coords.latitude;
-            var longitude = location.coords.longitude;
-            log("Retrieved user's location: [" + latitude + ", " + longitude + "]");
+        // getLocation: function() {
+        //     if (typeof navigator !== "undefined" && typeof navigator.geolocation !== "undefined") {
+        //         log("Asking user to get their location");
+        //         navigator.geolocation.getCurrentPosition(position => {
+        //                 this.geolocationCallback(position)
+        //             },
+        //             error => {
+        //                 this.errorHandler(error)
+        //             });
+        //     } else {
+        //         log("Your browser does not support the HTML5 Geolocation API, so this demo will not work.")
+        //     }
+        // },
+        // geolocationCallback: function(location) {
+        //     var latitude = location.coords.latitude;
+        //     var longitude = location.coords.longitude;
+        //     log("Retrieved user's location: [" + latitude + ", " + longitude + "]");
 
-            store.location = [latitude, longitude];
-            this.updateCenter([latitude, longitude]);
+        //     store.location = [latitude, longitude];
+        //     this.updateCenter([latitude, longitude]);
 
-            // var username = "wesley";
-            var username = firebase.auth().currentUser.uid;
+        //     // var username = "wesley";
+        //     var username = firebase.auth().currentUser.uid;
 
-            geoFire.set(username, [latitude, longitude]).then(function() {
-                log("Current user " + username + "'s location has been added to GeoFire");
-                // When the user disconnects from Firebase (e.g. closes the app, exits the browser),
-                // remove their GeoFire entry
-                // firebaseRef.child(username).onDisconnect().remove();
+        //     geoFire.set(username, [latitude, longitude]).then(function() {
+        //         log("Current user " + username + "'s location has been added to GeoFire");
+        //         // When the user disconnects from Firebase (e.g. closes the app, exits the browser),
+        //         // remove their GeoFire entry
+        //         // firebaseRef.child(username).onDisconnect().remove();
 
-                log("Added handler to remove user " + username + " from GeoFire when you leave this page.");
-            }).catch(function(error) {
-                log("Error adding user " + username + "'s location to GeoFire");
-                //sometimes this error when it's removing at setting at the same time
-            });
-        },
-        updateCenter: function(center, radius) {
-            if (!center) {
-                debugger;
-            }
-            console.log('updating center to: ', center);
-            geoQuery.updateCriteria({
-                center: center,
-                radius: 100
-            });
-        },
-        errorHandler: function(error) {
-            if (error.code == 1) {
-                log("Error: PERMISSION_DENIED: User denied access to their location");
-            } else if (error.code === 2) {
-                log("Error: POSITION_UNAVAILABLE: Network is down or positioning satellites cannot be reached");
-            } else if (error.code === 3) {
-                log("Error: TIMEOUT: Calculating the user's location too took long");
-            } else {
-                log("Unexpected error code")
-            }
-        },
+        //         log("Added handler to remove user " + username + " from GeoFire when you leave this page.");
+        //     }).catch(function(error) {
+        //         log("Error adding user " + username + "'s location to GeoFire");
+        //         //sometimes this error when it's removing at setting at the same time
+        //     });
+        // },
+        // updateCenter: function(center, radius) {
+        //     if (!center) {
+        //         debugger;
+        //     }
+        //     console.log('updating center to: ', center);
+        //     geoQuery.updateCriteria({
+        //         center: center,
+        //         radius: 100
+        //     });
+        // },
+        // errorHandler: function(error) {
+        //     if (error.code == 1) {
+        //         log("Error: PERMISSION_DENIED: User denied access to their location");
+        //     } else if (error.code === 2) {
+        //         log("Error: POSITION_UNAVAILABLE: Network is down or positioning satellites cannot be reached");
+        //     } else if (error.code === 3) {
+        //         log("Error: TIMEOUT: Calculating the user's location too took long");
+        //     } else {
+        //         log("Unexpected error code")
+        //     }
+        // },
         getProfileInfo: function(profileToLookup) {
             console.log('looking up profile: ', profileToLookup);
             var profilesRef = firebase.database().ref('profiles/' + profileToLookup + '');
@@ -105,51 +106,7 @@ export default {
                 //debugger;
                 Vue.set(self.profiles, snapshot.ref.key, mergedData)
             });
-        },
-        init: function() {
-            var center = store.location || [0, 0];
-            var self = this;
-
-            geoQuery = geoFire.query({
-                center: center,
-                radius: 100.5
-            });
-
-
-            geoQueryGuyWatcher = geoQuery.on("key_entered", (key, location, distance) => {
-                console.log("Bicycle shop " + key + " found at " + location + " (" + distance + " km away)");
-                Vue.set(self.profiles, key, {
-                    distance: distance,
-                    uid: key
-                });
-                self.getProfileInfo(key);
-            });
-            console.log('set a watcher');
-
-
-            geoQuery.on("key_exited", function(key, location, distance) {
-                console.log(key + " exited query to " + location + " (" + distance + " km from center)");
-                Vue.delete(self.profiles, key);
-            });
-
-
-
         }
-    },
-    created: function() {
-        console.log('mounted');
-
-        this.init();
-        this.getLocation();
-
-
-    },
-    destroyed: function() {
-        // geoQueryGuyWatcher.cancel();
-        // debugger;
-        console.log('destorying', geoQueryGuyWatcher);
-        geoQueryGuyWatcher.cancel();
-
     },
     filters: {
         kmToFeet: function(km) {
@@ -160,7 +117,7 @@ export default {
 }
 </script>
 <style>
-.grid {
+/*.grid {
     margin: 0;
     display: flex;
     flex-wrap: wrap;
@@ -181,7 +138,7 @@ export default {
     box-sizing: border-box;
 }
 
-.me {
+.profile.me {
     border: 2px solid yellow;
     order: -1;
 }
@@ -202,5 +159,5 @@ export default {
     font-weight: bold;
     font-size: .75rem;
     align-self: flex-start;
-}
+}*/
 </style>

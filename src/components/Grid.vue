@@ -3,6 +3,10 @@
         <div v-for="profile in profilesOrdered" :key="profile.key" class="profile" :class="[profile.uid == currentUser.uid ?  'me' : '']" :style="'background-image: url('+ profile.imagePrimary +');'">
             <router-link :to="'/profile/'+profile.uid">
                 {{profile.distance | kmToDistance}}
+                
+               <!--  <div v-if="favoritesLoaded">
+                <span v-if="isaFavorite(profile.key)">star</span>
+            </div> -->
                 <div class="displayname">{{profile.displayName}}</div>
             </router-link>
         </div>
@@ -155,12 +159,12 @@ export default {
         kmToDistance: function(km) {
             if (!km) return '0 ft';
 
-            if(km <= 1.60934){
+            if (km <= 1.60934) {
                 return Math.round(km * 3280.8) + 'ft';
-            }else{
+            } else {
                 return Math.round(km * 0.621371) + 'mi';
             }
-            
+
         }
     }
 }
@@ -182,7 +186,7 @@ export default {
     background-size: cover;
     background-repeat: no-repeat;
     border-radius: .25rem;
-    padding: .25rem .5rem ;
+    padding: .25rem .5rem;
     margin: .025rem;
     box-sizing: border-box;
     animation: fadein 2s;
@@ -212,7 +216,11 @@ export default {
 }
 
 @keyframes fadein {
-    from { opacity: 0; }
-    to   { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 </style>

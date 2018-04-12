@@ -24,8 +24,9 @@
     }
   ],
   "start_url": "/",
-  "display": "fullscreen",
+  "display": "standalone",
   "orientation": "portrait",
   "background_color": "#111111",
-  "theme_color": "#222222"
+  "theme_color": "#222222",
+  "lang": "en-US"
 }

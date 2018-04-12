@@ -3,7 +3,7 @@
         <div v-if="mode=='view'" class="profile-large" :style="'background-image: url('+ profile.imagePrimary +');'">
             <div class="profile-content">
                 <div class="profile-top">
-                    <a @click="toggleFavorite" :class="[isFavorite ?  'active' : '']"><span class="fas fa-star" alt="Add to Favorites" ></span></a>
+                    <a @click="toggleFavorite(id)" :class="[isFavorite ?  'active' : '']"><span class="fas fa-star" alt="Add to Favorites" ></span></a>
                 </div>
                 <div class="profile-bottom">
                     <h4>{{ profile.displayName }} <span class="age">{{profile.age}}</span></h4>
@@ -54,7 +54,7 @@ export default {
             age: '',
             imageUrl: '',
             imagePrimary: '',
-            favorites: store.favorites,
+            // favorites: store.favorites,
             profile: {
                 displayName: '',
                 description: '',
@@ -80,7 +80,10 @@ export default {
             return this.id;
         },
         isFavorite: function(){
-            return _(store.favorites).has(this.id);
+            return _(this.$parent.data.favorites).has(this.id);
+        },
+        favorites: function(){
+            return this.$parent.data.favorites;
         }
     },
     methods: {
@@ -107,49 +110,27 @@ export default {
             console.log('Wrote user data for ', this.currentUser.uid);
             this.mode = 'view';
         },
-        toggleFavorite: function(){
-            console.log('isFavorite', this.isFavorite);
+        toggleFavorite: function(id){
+            console.log('toggle favorite', id);
+
+            console.log('this.isFavorite ', this.isFavorite);
             if(this.isFavorite){
-                this.removeFromFavorites();
+                this.removeFromFavorites(id);
             }else{
-                this.addToFavorites();
+                this.addToFavorites(id);
             }
         },
-        addToFavorites: function() {
+        addToFavorites: function(id) {
             firebase.database().ref('users/' + this.currentUser.uid + '/favorites').update(
-                {[this.id]: true}
+                {[id]: true}
             );
             console.log('Add user ' + this.id + ' to favorites for ', this.currentUser.uid);
-            // this.getFavorites();
         },
-        removeFromFavorites: function() {
+        removeFromFavorites: function(id) {
             firebase.database().ref('users/' + this.currentUser.uid + '/favorites/' +this.id).remove(
             );
 
-            console.log('Remove user ' + this.id + ' from favorites for ', this.currentUser.uid);
-            // this.getFavorites();
-        },
-        getFavorites: function() {
-            var favoritesRef = firebase.database().ref('users/' + this.currentUser.uid + '/favorites');
-            self = this;
-            favoritesRef.on('value', function(snapshot) {
-                // store.favorites = Object.assign(store.favorites, snapshot.val());
-                store.favorites = snapshot.val();
-                console.log('favorites has changed',snapshot.val());
-
-                self.favorites = {};
-                console.log('cleared', self.favorites);
-                self.favorites = Object.assign({}, self.favorites, store.favorites)
-
-                // Vue.set(self, 'favorites', store.favorites);
-                // self.favorites = 'asdf';
-                // self.favorites = store.favorites;
-                //Update the star
-                // self.findKey(self.favorites, self.id);
-                // if (self.findKey(self.favorites, self.id)) {
-                //     self.isFavorite = true;
-                // }
-            });
+            console.log('Remove user ' + id + ' from favorites for ', this.currentUser.uid);
         },
         getProfileInfo: function(profileToLookup) {
             console.log('looking up profile: ', profileToLookup);
@@ -238,7 +219,9 @@ export default {
             } else {
                 this.getProfileInfo(this.currentUser.uid);
             }
-            this.getFavorites();
+
+           // debugger;
+
         })
     },
     watch: {
