@@ -164,7 +164,7 @@ export default {
     margin: 0;
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
+    justify-content: flex-start;
 }
 
 .profile {

@@ -9,7 +9,7 @@
         </div>
         <form @submit.prevent="sendMessage" class="text-container">
             <input type="text" v-model="myMessage" class="text-input">
-            <button>Send</button>
+            <button class="sendMessage">Send</button>
         </form>
     </div>
 </template>
@@ -110,10 +110,10 @@ export default {
             //update recipient unread count on other user (users/conversation/otherguy/me)
             var databaseRef = firebase.database().ref('users/conversations/' + this.id + '/' + this.currentUser.uid).child('unseenCount');
             databaseRef.transaction(function(unseenCount) {
-              if (unseenCount) {
-                unseenCount = unseenCount + 1;
-              }
-              return (unseenCount || 1);
+                if (unseenCount) {
+                    unseenCount = unseenCount + 1;
+                }
+                return (unseenCount || 1);
             });
 
             self.myMessage = '';
@@ -122,12 +122,19 @@ export default {
         },
         getMessages: function() {
             var profilesRef = firebase.database().ref('conversations/' + this.conversationid + '/messages');
-            var self = this;
+            var vm = this;
             profilesRef.on('value', function(snapshot) {
                 console.log('Getting messages ', snapshot.val());
 
-                self.messages = snapshot.val();
-                self.updateScroll();
+                vm.messages = snapshot.val();
+                vm.updateScroll();
+
+                //Clear unseen count
+                // var unreadRef = 'users/conversations/' + vm.id + '/' + vm.currentUser.uid;
+                // firebase.database().ref(unreadRef).update({
+                //     unseenCount: 0
+                // });
+
             });
         },
         updateScroll: function() {
@@ -232,6 +239,8 @@ export default {
 
 .text-input {
     flex-grow: 1;
+    background: #333;
+    border: 0;
 }
 
 .messages {
@@ -253,7 +262,11 @@ export default {
 }
 
 .message.me {
-    background-color: orangered;
+    background-color: #ffba3b;
     align-self: flex-end;
+}
+
+.sendMessage {
+    border: 0;
 }
 </style>
