@@ -38,7 +38,7 @@
             <br>
             <label for="fileinput">Upload a Photo</label>
             <input type="file" @change="onFileChange" id="fileinput">
-            <button>Upload Image</button>
+            <button id="submitUploadImage">Upload Image</button>
         </form>
     </div>
 </template>
@@ -161,7 +161,6 @@ export default {
             });
         },
         getProfileImages: function(uid) {
-            debugger;
             var storageRef = firebase.storage().ref().child('profiles/' + uid + '/' + file.name);
 
         },
@@ -169,6 +168,7 @@ export default {
             var files = e.target.files || e.dataTransfer.files;
             if (!files.length)
                 return;
+            document.getElementById('submitUploadImage').disabled = true;
             this.uploadImage(files[0]);
         },
         uploadImage: function(file) {
@@ -217,8 +217,10 @@ export default {
                             // Unknown error occurred, inspect error.serverResponse
                             break;
                     }
+                    document.getElementById('submitUploadImage').disabled = false;
                 },
                 function() {
+                    document.getElementById('submitUploadImage').disabled = false;
                     // Upload completed successfully, now we can get the download URL
                     var downloadURL = uploadTask.snapshot.downloadURL;
                     self.profile.imageUrl = downloadURL;

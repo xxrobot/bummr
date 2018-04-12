@@ -183,7 +183,7 @@ export default {
     background-repeat: no-repeat;
     border-radius: .25rem;
     padding: .25rem .5rem ;
-    margin: .125rem;
+    margin: .025rem;
     box-sizing: border-box;
 }
 

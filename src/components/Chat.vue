@@ -44,7 +44,7 @@ export default {
     methods: {
         getConversationId: function() {
             var userRef = firebase.database().ref('users/conversations/' + this.currentUser.uid + '/' + this.id);
-            self = this;
+            var self = this;
             userRef.on('value', function(snapshot) {
                 //If this returns null we need a new conversation
                 if (snapshot.val() == null) {
@@ -58,7 +58,7 @@ export default {
 
         },
         newConversation: function() {
-            self = this;
+            var self = this;
             firebase.database().ref('conversations').push({
                 boop: ''
             }).then(
@@ -92,7 +92,7 @@ export default {
             }
 
 
-            self = this;
+            var self = this;
             console.log(this.conversationid);
             firebase.database().ref('conversations/' + this.conversationid).update({
                 members: [this.currentUser.uid, this.id],
@@ -106,13 +106,23 @@ export default {
                 sender: this.currentUser.uid
             });
 
+
+            //update recipient unread count on other user (users/conversation/otherguy/me)
+            var databaseRef = firebase.database().ref('users/conversations/' + this.id + '/' + this.currentUser.uid).child('unseenCount');
+            databaseRef.transaction(function(unseenCount) {
+              if (unseenCount) {
+                unseenCount = unseenCount + 1;
+              }
+              return (unseenCount || 1);
+            });
+
             self.myMessage = '';
             self.updateScroll();
 
         },
         getMessages: function() {
             var profilesRef = firebase.database().ref('conversations/' + this.conversationid + '/messages');
-            self = this;
+            var self = this;
             profilesRef.on('value', function(snapshot) {
                 console.log('Getting messages ', snapshot.val());
 
@@ -137,7 +147,7 @@ export default {
             // File or Blob named mountains.jpg
             var file = file;
             var storageRef = firebase.storage().ref();
-            self = this;
+            var self = this;
 
             // Create the file metadata
             var metadata = {

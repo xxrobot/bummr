@@ -5,15 +5,49 @@
         </transition>
         <nav>
             <router-link to="/Hello"><span class="fas fa-th" alt="Grid"></span></router-link>
-            <router-link to="/profile">My Profile</router-link>
-            <router-link to="/conversations"><span class="fas fa-comment-alt" alt="Messages"></span></router-link>
+            <router-link to="/profile"><span class="fas fa-address-book"></span></router-link>
+            <router-link to="/conversations">
+                <span class="fas fa-comment-alt" alt="Messages"></span>
+                <div class="hasUnread" v-if="unread"></div>
+            </router-link>
             <router-link to="/favorites"><span class="fas fa-star" alt="favorites"></span></router-link>
       </nav>
     </div>
 </template>
 <script>
 export default {
-    name: 'app'
+    name: 'app',
+    data() {
+        return {
+            unread: 0
+        }
+    },
+    computed: {
+        currentUser: function() {
+            return firebase.auth().currentUser
+        }        
+    },    
+    methods:{
+        getUnread: function() {
+            var databaseRef = firebase.database().ref('users/conversations/' + this.currentUser.uid);
+            var self = this;
+            databaseRef.on('value', function(snapshot) {
+                console.log('messages changed ', snapshot.val());
+                store.conversations = snapshot.val();
+
+                var unreads = _.map(store.conversations, function(convo){ return convo.unseenCount; });
+                unreads = _.max(unreads);
+                self.updateUnread(unreads);
+                // debugger;
+            });  
+        },
+        updateUnread: function(number){
+            this.unread = number;
+        }       
+    },
+    mounted: function(){
+        this.getUnread();
+    }
 }
 
 window.store = {};
@@ -165,6 +199,7 @@ nav a, nav a:visited{
   text-decoration: none;
   color: #999;
   padding: 1rem;
+  position: relative;
 }
 
 nav a.router-link-active, .active{
@@ -196,4 +231,18 @@ button{
     font-size: 1rem;
     margin: .25rem;
 }
+
+.hasUnread{
+    background-color: red;
+    border-radius: 50%;
+    content: '';
+    position: absolute;
+    top: 0.8rem;
+    right: 0.6rem;
+    height: .5rem;
+    width: .5rem;
+    border: 2px solid black;
+    box-sizing: content-box;
+}
+
 </style>
