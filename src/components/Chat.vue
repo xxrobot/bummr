@@ -130,10 +130,10 @@ export default {
                 vm.updateScroll();
 
                 //Clear unseen count
-                // var unreadRef = 'users/conversations/' + vm.id + '/' + vm.currentUser.uid;
-                // firebase.database().ref(unreadRef).update({
-                //     unseenCount: 0
-                // });
+                var unreadRef = 'users/conversations/' + vm.currentUser.uid + '/' + vm.id;
+                firebase.database().ref(unreadRef).update({
+                    unseenCount: 0
+                });
 
             });
         },
