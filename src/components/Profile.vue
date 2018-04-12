@@ -312,6 +312,7 @@ textarea{min-height: 8rem}
 
 .description {
     margin-top: 1rem;
+    margin-right: 4rem;
 }
 
 .fab-hollow {

@@ -185,6 +185,7 @@ export default {
     padding: .25rem .5rem ;
     margin: .025rem;
     box-sizing: border-box;
+    animation: fadein 2s;
 }
 
 .profile.me {
@@ -208,5 +209,10 @@ export default {
     font-weight: bold;
     font-size: .75rem;
     align-self: flex-start;
+}
+
+@keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 1; }
 }
 </style>
