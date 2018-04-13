@@ -10,7 +10,7 @@
                     <p class="description">{{ profile.description }}</p>
                 </div>
                 <div class="fab-container">
-                    <router-link :to="'../chat/'+id" class="fab" tag="button"><span class="fas fa-comment-alt"></span></router-link>
+                    <router-link v-if="!isMyProfile" :to="'../chat/'+id" class="fab" tag="button"><span class="fas fa-comment-alt"></span></router-link>
                     <button class="fab" v-if="isMyProfile" @click="mode='edit'"><span class="fas fa-pencil-alt"></span></button>
                 </div>
             </div>
@@ -238,23 +238,15 @@ export default {
 <style scoped>
 label {
     display: block;
+    margin-top: .5rem;
+    margin-top: 1rem;
 }
 
 .container {
     padding-bottom: 0
 }
 
-input[type="text"], input[type="number"], input[type="tel"], input[type="file"], textarea{
-    height: 3rem;
-    min-width: 320px;
-    border: 0;
-    background-color: #111;
-    color: #fff;
-    padding: .5rem;
-    font-size: 1rem;
-}
-
-textarea{min-height: 8rem}
+textarea{min-height: 8rem; font-family: sans-serif;}
 
 .profile-large {
     background-size: cover;

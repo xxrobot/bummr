@@ -2,15 +2,33 @@
     <div class="container" id="messages">
         cid: {{conversationid}}
         <br> Chat from: {{currentUser.uid}} to: {{id}}
-        <div class="messages">
+        <div class="messages" id="scrollingContent"> 
             <div v-for="message in messagesOrdered" class="message" :class="[message.sender == currentUser.uid ?  'me' : '']">
                 {{message.text}}
             </div>
         </div>
-        <form @submit.prevent="sendMessage" class="text-container">
-            <input type="text" v-model="myMessage" class="text-input">
-            <button class="sendMessage">Send</button>
-        </form>
+        <div class="chat-bottom-drawer">
+            <div>
+                <form v-if="mode=='text'" @submit.prevent="sendMessage" class="d-flex">
+                    <input type="text" v-model="myMessage" class="text-input">
+                    <button class="sendMessage">Send</button>
+                </form>
+
+                <div v-if="mode=='myGallery'" class="myGallery">
+                    <div class="myGallery-image btn-add-photo"><span class="fas fa-plus"></span></div>
+                    <div class="myGallery-image"></div>
+                    <div class="myGallery-image"></div>
+                    <!-- :style="'background-image: url('+ profile.imagePrimary +');'" -->
+                </div>
+
+
+            </div>
+            <div class="chat-bottom-drawer-nav">
+                <a @click="mode='text'" :class="[mode == 'text' ?  'active' : '']"><span class="fas fa-keyboard"></span></a>
+                <a @click="mode='myGallery'" :class="[mode == 'myGallery' ?  'active' : '']"><span class="fas fa-image"></span></a>
+                <a @click="mode='sendLocation'" :class="[mode == 'sendLocation' ?  'active' : '']"><span class="fas fa-map-marker"></span></a>
+            </div>
+        </div>
     </div>
 </template>
 <script>
@@ -19,6 +37,7 @@ export default {
     props: ['id'],
     data() {
         return {
+            mode: 'text',
             imagePrimary: '',
             myMessage: '',
             conversationid: '',
@@ -138,8 +157,9 @@ export default {
             });
         },
         updateScroll: function() {
+            //maybe change the listner to on child_entered
             if (!this.scrolled) {
-                var element = document.querySelectorAll('body');
+                var element = document.querySelectorAll('#scrollingContent')[0];
                 element.scrollTop = element.scrollHeight;
 
             }
@@ -230,17 +250,71 @@ export default {
 }
 </script>
 <style scoped>
-.text-container {
+.container{
     display: flex;
-    position: fixed;
+    flex-direction: column;
+    padding-bottom: 3.5rem;
+    flex-grow: 1;
+}
+
+.d-flex {
+    display: flex;
+}
+
+.chat-bottom-drawer {
     bottom: 3.5rem;
     width: 100%;
+    background: #333;
+}
+
+.chat-bottom-drawer-nav{
+    display: flex;
+    justify-content: space-around;
+    background-color: rgba(0,0,0,.1);
+}
+
+.chat-bottom-drawer-nav a{
+    text-decoration: none;
+    color: #999;
+    padding: 1rem;
+    position: relative;
+    display: block;
+}
+
+.chat-bottom-drawer-nav a.active{
+    color: #ffba3b;
 }
 
 .text-input {
     flex-grow: 1;
-    background: #333;
+    background: transparent;
     border: 0;
+}
+
+.myGallery{
+    display: flex;
+    padding: .25rem;
+}
+
+.myGallery-image{
+    display: block;
+    height: calc(25vw - 0.25rem);
+    width: calc(25vw - 0.25rem);
+    border: 1px solid rgba(255,255,255,.1);
+    background-size: cover;
+    background-repeat: no-repeat;
+    border-radius: .25rem;
+    padding: .25rem .5rem;
+    margin: .25rem;
+    box-sizing: border-box;
+    animation: fadein 2s;
+}
+
+.btn-add-photo{
+    font-size: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .messages {
@@ -251,19 +325,58 @@ export default {
     padding-bottom: 4rem;
 }
 
+#scrollingContent{
+        display: flex;
+    flex-grow: 1;
+}
+
 .message {
     border-radius: .5rem;
     background-color: #9cd3fb;
     color: black;
-    margin: .25rem;
+    margin: .25rem 1rem;
     max-width: 80vw;
     align-self: flex-start;
     padding: .5rem 1rem;
+    position: relative;
+    border-bottom-left-radius: 0;
 }
 
 .message.me {
     background-color: #ffba3b;
     align-self: flex-end;
+    border-bottom-left-radius: .5rem;
+    border-bottom-right-radius: 0;
+}
+
+.message:after {
+    content: '';
+    position: absolute;
+    bottom: 10px;
+    left: 0;
+    width: 0;
+    height: 0;
+    border: 1rem solid transparent;
+    border-top-color: #9cd3fb;
+    border-bottom: 0;
+    border-left: 0;
+    margin-right: -10px;
+    margin-bottom: -1rem;
+}
+.message.me:after {
+    content: '';
+    position: absolute;
+    bottom: 10px;
+    left: unset;
+    right: 0;
+    width: 0;
+    height: 0;
+    border: 1rem solid transparent;
+    border-top-color: #ffba3b;
+    border-bottom: 0;
+    border-right: 0;
+    margin-right:  0;
+    margin-bottom: -1rem;
 }
 
 .sendMessage {

@@ -1,6 +1,29 @@
 {
   "rules": {
     ".read": "auth != null",
-    ".write": "auth != null"
+    ".write": "auth != null",
+      
+    "conversations":{
+    	"$conversationID":{
+    		"messages": {
+    			"messageID": {
+    				".indexOn": ["createdAt"]
+    			}
+    		}
+    	}
+    },
+    "users": {
+      "$uid": {
+        ".write": "$uid === auth.uid"
+      }
+    },
+    
+    "profiles": {
+      "$uid": {
+        ".write": "$uid === auth.uid"
+      }
+    }
+  
+    
   }
 }

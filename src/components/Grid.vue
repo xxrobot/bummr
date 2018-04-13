@@ -154,18 +154,6 @@ export default {
         console.log('destorying', geoQueryGuyWatcher);
         geoQueryGuyWatcher.cancel();
 
-    },
-    filters: {
-        kmToDistance: function(km) {
-            if (!km) return '0 ft';
-
-            if (km <= 1.60934) {
-                return Math.round(km * 3280.8) + 'ft';
-            } else {
-                return Math.round(km * 0.621371) + 'mi';
-            }
-
-        }
     }
 }
 </script>

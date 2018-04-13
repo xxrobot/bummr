@@ -12,6 +12,17 @@ window.Vue = Vue;
 Vue.use(Vue2Filters);
 Vue.prototype.$_ = lodash;
 
+Vue.filter('kmToDistance', function(km) {
+      if (!km) return '0 ft';
+
+      if (km <= 1.60934) {
+          return Math.round(km * 3280.8) + 'ft';
+      } else {
+          return Math.round(km * 0.621371) + 'mi';
+      }
+
+  });
+
 Vue.config.productionTip = false
 
 let app;

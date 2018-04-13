@@ -15,6 +15,7 @@
     </div>
 </template>
 <script>
+
 export default {
     name: 'app',
     data() {
@@ -42,7 +43,6 @@ export default {
                 var unreads = _.map(store.conversations, function(convo){ return convo.unseenCount; });
                 unreads = _.max(unreads);
                 self.updateUnread(unreads);
-                // debugger;
             });  
         },
         watchFavorites: function() {
@@ -231,6 +231,16 @@ button{
   border: 1px solid #000;
 }
 
+
+input[type="text"], input[type="number"], input[type="tel"], input[type="file"], textarea{
+    height: 3rem;
+    min-width: 320px;
+    border: 0;
+    background-color: #111;
+    color: #fff;
+    padding: .5rem;
+    font-size: 1rem;
+}
 
 .fab-container {
     position: absolute;
