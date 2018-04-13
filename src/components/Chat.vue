@@ -1,27 +1,32 @@
 <template>
     <div class="container" id="messages">
-        cid: {{conversationid}}
-        <br> Chat from: {{currentUser.uid}} to: {{id}}
-        <div class="messages" id="scrollingContent"> 
+        <div style="font-size: 10px; color: #888; line-height: 1.25">cid: {{conversationid}}
+        <br> Chat from: {{currentUser.uid}} to: {{id}}</div>
+        <div class="messages" id="scrollingContent">
             <div v-for="message in messagesOrdered" class="message" :class="[message.sender == currentUser.uid ?  'me' : '']">
-                {{message.text}}
+                <template v-if="message.text">{{message.text}}</template>
+                <div :style="'background-image: url('+ message.image +');'" class="myGallery-image" v-if="message.image"></div>
             </div>
         </div>
         <div class="chat-bottom-drawer">
             <div>
-                <form v-if="mode=='text'" @submit.prevent="sendMessage" class="d-flex">
+                <form v-if="mode=='text'" @submit.prevent="sendMessage('text')" class="d-flex">
                     <input type="text" v-model="myMessage" class="text-input">
                     <button class="sendMessage">Send</button>
                 </form>
-
                 <div v-if="mode=='myGallery'" class="myGallery">
-                    <div class="myGallery-image btn-add-photo"><span class="fas fa-plus"></span></div>
-                    <div class="myGallery-image"></div>
-                    <div class="myGallery-image"></div>
-                    <!-- :style="'background-image: url('+ profile.imagePrimary +');'" -->
+                    <form>
+                        <label for="fileinput">
+                            <div class="myGallery-image btn-add-photo">
+                                <span v-if="!isUploading" class="fas fa-plus"></span>
+                                <span v-if="isUploading" class="fas fa-circle-notch fa-spin"></span>
+                            </div>
+                        </label>
+                        <input type="file" @change="onFileChange" id="fileinput" style="display: none;">
+                        <!-- <button id="submitUploadImage">Upload Image</button> -->
+                    </form>
+                    <div v-for="image in data.gallery" :style="'background-image: url('+ image.downloadURL +');'" class="myGallery-image" @click="sendMessage('image',image.downloadURL)"></div>
                 </div>
-
-
             </div>
             <div class="chat-bottom-drawer-nav">
                 <a @click="mode='text'" :class="[mode == 'text' ?  'active' : '']"><span class="fas fa-keyboard"></span></a>
@@ -42,7 +47,11 @@ export default {
             myMessage: '',
             conversationid: '',
             messages: '',
-            scrolled: false
+            scrolled: false,
+            isUploading: false,
+            data: {
+                gallery: {}
+            }
         }
     },
     computed: {
@@ -99,8 +108,9 @@ export default {
 
                 })
         },
-        sendMessage: function() {
-            if (this.myMessage == '') {
+        sendMessage: function(type,value) {
+            console.log('sending a message', type, value)
+            if (this.myMessage == '' && type == 'text') {
                 return;
             }
 
@@ -111,19 +121,37 @@ export default {
             }
 
 
+
             var self = this;
             console.log(this.conversationid);
-            firebase.database().ref('conversations/' + this.conversationid).update({
-                members: [this.currentUser.uid, this.id],
-                lastMessageTime: Date.now(),
-                lastMessage: self.myMessage
-            });
 
-            firebase.database().ref('conversations/' + this.conversationid + '/messages/').push({
-                text: self.myMessage,
-                createdAt: Date.now(),
-                sender: this.currentUser.uid
-            });
+            if(type == 'image'){
+                firebase.database().ref('conversations/' + this.conversationid).update({
+                    members: [this.currentUser.uid, this.id],
+                    lastMessageTime: Date.now(),
+                    lastMessage: 'Sent an Image'
+                });
+
+                firebase.database().ref('conversations/' + this.conversationid + '/messages/').push({
+                    image: value,
+                    createdAt: Date.now(),
+                    sender: this.currentUser.uid
+                });
+            }
+
+            if(type == 'text'){
+                firebase.database().ref('conversations/' + this.conversationid).update({
+                    members: [this.currentUser.uid, this.id],
+                    lastMessageTime: Date.now(),
+                    lastMessage: self.myMessage
+                });
+
+                firebase.database().ref('conversations/' + this.conversationid + '/messages/').push({
+                    text: self.myMessage,
+                    createdAt: Date.now(),
+                    sender: this.currentUser.uid
+                });
+            }
 
 
             //update recipient unread count on other user (users/conversation/otherguy/me)
@@ -196,6 +224,7 @@ export default {
                             break;
                         case firebase.storage.TaskState.RUNNING: // or 'running'
                             console.log('Upload is running');
+                            self.isUploading = true;
                             break;
                     }
                 },
@@ -220,22 +249,41 @@ export default {
                 function() {
                     // Upload completed successfully, now we can get the download URL
                     var downloadURL = uploadTask.snapshot.downloadURL;
-                    self.profile.imageUrl = downloadURL;
-                    self.writeUserData();
-                    this.mode = 'view';
+                    // self.profile.imageUrl = downloadURL;
+                    self.addImageToGallery(downloadURL);
+                    self.isUploading = false;
                 });
-        }
+        },
+        addImageToGallery: function(downloadURL) {
+            firebase.database().ref('profiles/' + this.currentUser.uid + '/gallery').push({
+                downloadURL
+            });
+            console.log('added gallery image for ', this.currentUser.uid);
+        },
+        onFileChange(e) {
+            var files = e.target.files || e.dataTransfer.files;
+            if (!files.length)
+                return;
+            this.uploadImage(files[0]);
+        },
+        watchGallery: function() {
+            console.log('getting gallery');
+            var firebaseRef = firebase.database().ref('profiles/' + this.currentUser.uid + '/gallery');
+            var vm = this;
+            firebaseRef.on('child_added', function(snapshot) {
+                vm.$set(vm.data.gallery, snapshot.key, snapshot.val());
+            });
+
+            firebaseRef.on('child_removed', function(snapshot) {
+                // vm.$set(vm.data.favorites, snapshot.key, false);
+                vm.$delete(vm.data.gallery, snapshot.key);
+            });
+        },
     },
     mounted: function() {
         this.$nextTick(function() {
             this.getConversationId();
-            // Code that will run only after the
-            // entire view has been rendered
-            // if (this.id) {
-            //     this.getProfileInfo(this.id);
-            // } else {
-            //     this.getProfileInfo(this.currentUser.uid);
-            // }
+            this.watchGallery()
             document.addEventListener('scroll', function() {
                 this.scrolled = true;
             });
@@ -250,7 +298,7 @@ export default {
 }
 </script>
 <style scoped>
-.container{
+.container {
     display: flex;
     flex-direction: column;
     padding-bottom: 3.5rem;
@@ -267,13 +315,13 @@ export default {
     background: #333;
 }
 
-.chat-bottom-drawer-nav{
+.chat-bottom-drawer-nav {
     display: flex;
     justify-content: space-around;
-    background-color: rgba(0,0,0,.1);
+    background-color: rgba(0, 0, 0, .1);
 }
 
-.chat-bottom-drawer-nav a{
+.chat-bottom-drawer-nav a {
     text-decoration: none;
     color: #999;
     padding: 1rem;
@@ -281,7 +329,7 @@ export default {
     display: block;
 }
 
-.chat-bottom-drawer-nav a.active{
+.chat-bottom-drawer-nav a.active {
     color: #ffba3b;
 }
 
@@ -291,16 +339,17 @@ export default {
     border: 0;
 }
 
-.myGallery{
+.myGallery {
     display: flex;
     padding: .25rem;
+    overflow-x: scroll;
 }
 
-.myGallery-image{
+.myGallery-image {
     display: block;
     height: calc(25vw - 0.25rem);
     width: calc(25vw - 0.25rem);
-    border: 1px solid rgba(255,255,255,.1);
+    border: 1px solid rgba(255, 255, 255, .1);
     background-size: cover;
     background-repeat: no-repeat;
     border-radius: .25rem;
@@ -308,9 +357,10 @@ export default {
     margin: .25rem;
     box-sizing: border-box;
     animation: fadein 2s;
+    flex-shrink: 0;
 }
 
-.btn-add-photo{
+.btn-add-photo {
     font-size: 2rem;
     display: flex;
     align-items: center;
@@ -325,8 +375,8 @@ export default {
     padding-bottom: 4rem;
 }
 
-#scrollingContent{
-        display: flex;
+#scrollingContent {
+    display: flex;
     flex-grow: 1;
 }
 
@@ -363,6 +413,7 @@ export default {
     margin-right: -10px;
     margin-bottom: -1rem;
 }
+
 .message.me:after {
     content: '';
     position: absolute;
@@ -375,7 +426,7 @@ export default {
     border-top-color: #ffba3b;
     border-bottom: 0;
     border-right: 0;
-    margin-right:  0;
+    margin-right: 0;
     margin-bottom: -1rem;
 }
 
