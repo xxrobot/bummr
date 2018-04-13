@@ -6,6 +6,7 @@
             <div v-for="message in messagesOrdered" class="message" :class="[message.sender == currentUser.uid ?  'me' : '']">
                 <template v-if="message.text">{{message.text}}</template>
                 <div :style="'background-image: url('+ message.image +');'" class="myGallery-image" v-if="message.image"></div>
+                <template v-if="message.location">{{message.location}}</template>
             </div>
         </div>
         <div class="chat-bottom-drawer">
@@ -31,7 +32,7 @@
             <div class="chat-bottom-drawer-nav">
                 <a @click="mode='text'" :class="[mode == 'text' ?  'active' : '']"><span class="fas fa-keyboard"></span></a>
                 <a @click="mode='myGallery'" :class="[mode == 'myGallery' ?  'active' : '']"><span class="fas fa-image"></span></a>
-                <a @click="mode='sendLocation'" :class="[mode == 'sendLocation' ?  'active' : '']"><span class="fas fa-map-marker"></span></a>
+                <a @click="sendLocation();" :class="[mode == 'sendLocation' ?  'active' : '']"><span class="fas fa-map-marker"></span></a>
             </div>
         </div>
     </div>
@@ -134,6 +135,20 @@ export default {
 
                 firebase.database().ref('conversations/' + this.conversationid + '/messages/').push({
                     image: value,
+                    createdAt: Date.now(),
+                    sender: this.currentUser.uid
+                });
+            }
+
+            if(type == 'location'){
+                firebase.database().ref('conversations/' + this.conversationid).update({
+                    members: [this.currentUser.uid, this.id],
+                    lastMessageTime: Date.now(),
+                    lastMessage: 'Sent their location'
+                });
+
+                firebase.database().ref('conversations/' + this.conversationid + '/messages/').push({
+                    location: value,
                     createdAt: Date.now(),
                     sender: this.currentUser.uid
                 });
@@ -265,6 +280,14 @@ export default {
             if (!files.length)
                 return;
             this.uploadImage(files[0]);
+        },
+        sendLocation: function(){
+            if(!store.location){
+                alert("couldn't find location");
+                return;
+            }
+
+            this.sendMessage('location',store.location);
         },
         watchGallery: function() {
             console.log('getting gallery');
