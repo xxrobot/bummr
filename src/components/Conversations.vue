@@ -1,7 +1,7 @@
 <template>
     <div class="container">
         <div class="conversations">
-            <div v-for="(conversation, key) in data.conversationPartners" class="message">
+            <div v-for="(conversation, key) in data.conversationPartners" class="message" v-if="conversation.lastMessage">
                 <router-link :to="'/chat/'+key" tag="div" class="conversation">
                     <div class="thumbnail" :style="'background-image: url('+ conversation.imagePrimary +');'">
                     </div>

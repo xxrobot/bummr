@@ -232,7 +232,7 @@ button{
 }
 
 
-input[type="text"], input[type="number"], input[type="tel"], input[type="file"], textarea{
+input[type="text"], input[type="number"], input[type="tel"], input[type="file"], input[type="password"], textarea{
     height: 3rem;
     min-width: 320px;
     border: 0;

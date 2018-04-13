@@ -24,7 +24,7 @@
                 </div>
                 <div>
                     <label for="age">Age</label>
-                    <input type="number" v-model="profile.age" id="age">
+                    <input type="number" v-model="profile.age" id="age" min="18" max="99">
                 </div>
                 <div>
                     <label for="description">Description</label>
