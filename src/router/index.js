@@ -76,8 +76,8 @@ let router = new Router({
     },
         {
       path: '/favorites',
-      component: Favorites,
-      props: true,
+      component: Grid,
+      props: { default: true, favoritesMode: true },
       meta: {
         requiresAuth: true
       }

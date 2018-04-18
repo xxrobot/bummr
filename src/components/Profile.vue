@@ -45,7 +45,7 @@
 <script>
 export default {
     name: 'Profile',
-    props: ['id'],
+    props: ['id','data'],
     data() {
         return {
             mode: 'view',
@@ -54,7 +54,6 @@ export default {
             age: '',
             imageUrl: '',
             imagePrimary: '',
-            // favorites: store.favorites,
             profile: {
                 displayName: '',
                 description: '',
@@ -80,7 +79,8 @@ export default {
             return this.id;
         },
         isFavorite: function(){
-            return _(this.$parent.data.favorites).has(this.id);
+            // return _(this.$parent.data.favorites).has(this.id);
+            return this.data.favorites.hasOwnProperty(this.id);
         },
         favorites: function(){
             return this.$parent.data.favorites;

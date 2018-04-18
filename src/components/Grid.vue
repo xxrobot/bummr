@@ -1,6 +1,18 @@
 <template>
     <div class="grid">
-        <div v-for="profile in profilesOrdered" :key="profile.key" class="profile" :class="[profile.uid == currentUser.uid ?  'me' : '']" :style="'background-image: url('+ profile.imagePrimary +');'">
+
+
+        <div v-for="profile in profilesOrdered" :key="profile.key" class="profile" :class="[profile.uid == currentUser.uid ?  'me' : '']" :style="'background-image: url('+ profile.imagePrimary +');'" v-if="!favoritesMode">
+            <router-link :to="'/profile/'+profile.uid">
+                {{profile.distance | kmToDistance}}
+                <div class="displayname">
+                    <span v-if="isaFavorite(profile.uid)" class="fas fa-star active"></span> {{profile.displayName}}
+                </div>
+            </router-link>
+        </div>
+
+        <!-- Favorites mode -->
+        <div v-for="profile in profilesOrdered" :key="profile.key" class="profile" :class="[profile.uid == currentUser.uid ?  'me' : '']" :style="'background-image: url('+ profile.imagePrimary +');'" v-if="favoritesMode && isaFavorite(profile.uid)">
             <router-link :to="'/profile/'+profile.uid">
                 {{profile.distance | kmToDistance}}
                 <div class="displayname">
@@ -13,7 +25,7 @@
 <script>
 export default {
     name: 'Grid',
-    props: ['data'],
+    props: ['data','favoritesMode'],
     data: function() {
         return {
             profiles: {},
@@ -181,14 +193,5 @@ export default {
     font-weight: bold;
     font-size: .75rem;
     align-self: flex-start;
-}
-
-@keyframes fadein {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
 }
 </style>
