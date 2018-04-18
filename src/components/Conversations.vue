@@ -25,7 +25,7 @@ export default {
             myMessage: '',
             data: {
                 conversationPartners: {}
-            }
+            },
         }
     },
     computed: {
@@ -62,43 +62,8 @@ export default {
 
                 });
 
-
-
             });
         },
-        getConversationsData: function() {
-
-            //gets the additional information for each person this users has conversed with
-            // for (i = 0; i < this.conversations.length; i++) {
-            //     var userRef = firebase.database().ref('conversations/' + conversationid);
-            //     self = this;
-            //     userRef.on('value', function(snapshot) {
-            //         debugger;
-            //         self.conversations['conversationid'] = snapshot.val();
-            //     });
-            // }
-
-            for (var profile in this.data.conversationPartners) {
-                console.log('looking up ', profile)
-                var userRef = firebase.database().ref('profiles/' + profile + '/imagePrimary');
-                var vm = this;
-                userRef.on('value', function(snapshot) {
-                    console.log('looking up ', profile)
-                        // vm.conversations[profile].imageURL = snapshot.val();
-                    vm.$set(vm.data, 'conversationPartners' + [profile], snapshot.val());
-
-                });
-
-                //get last message from conversationid
-                // var userRef = firebase.database().ref('conversations/' + self.conversations[profile]['conversationid']);
-                // self = this;
-                // userRef.on('value', function(snapshot) {
-                //     self.conversations[profile].lastMessage = snapshot.val().lastMessage;
-                // });
-            }
-
-        }
-
     },
     mounted: function() {
         this.getConversations();

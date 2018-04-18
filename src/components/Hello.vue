@@ -10,12 +10,14 @@ import Grid from './Grid';
 
 export default {
   name: 'hello',
+    props: ['data'],
   components: {
     'grid': Grid
   },
   data () {
     return {
       msg: 'Welcome to Your Vue.js App',
+      parentData: this.data
     }
   },
   methods: {

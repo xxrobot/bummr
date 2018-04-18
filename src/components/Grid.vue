@@ -3,43 +3,59 @@
         <div v-for="profile in profilesOrdered" :key="profile.key" class="profile" :class="[profile.uid == currentUser.uid ?  'me' : '']" :style="'background-image: url('+ profile.imagePrimary +');'">
             <router-link :to="'/profile/'+profile.uid">
                 {{profile.distance | kmToDistance}}
-                
-               <!--  <div v-if="favoritesLoaded">
-                <span v-if="isaFavorite(profile.key)">star</span>
-            </div> -->
-                <div class="displayname">{{profile.displayName}}</div>
+                <div class="displayname">
+                    <span v-if="isaFavorite(profile.uid)" class="fas fa-star active"></span> {{profile.displayName}}
+                </div>
             </router-link>
         </div>
     </div>
 </template>
 <script>
-function log(val) {
-    console.log(val);
-}
-
-var geoQueryGuyWatcher;
-
 export default {
     name: 'Grid',
+    props: ['data'],
     data: function() {
         return {
             profiles: {},
             latlon: '',
             store: store,
+            dudes: {}
         }
     },
     computed: {
         profilesOrdered: function() {
-            return _.orderBy(this.profiles, ['distance'])
+            if (this.$parent.data) {
+                return _.orderBy(this.dudesInfo, ['distance'])
+            }
         },
         currentUser: function() {
             return firebase.auth().currentUser
-        }
+        },
+        dudesInfo: function() {
+            var vm = this;
+            var keys = Object.keys(this.data.grid);
+            var promises = keys.map(function(key) {
+                return firebase.database().ref("/profiles/").child(key).once("value");
+            });
+            Promise.all(promises).then(function(snapshots) {
+                snapshots.forEach(function(snapshot) {
+                    var mergedData = Object.assign({}, vm.data.grid[snapshot.key], snapshot.val());
+                    Vue.set(vm.dudes, snapshot.key, mergedData);
+                    // debugger;
+                    console.log('got data for', snapshot.key + ": ", snapshot.val());
+                });
+            });
+
+            return this.dudes;
+        },
     },
     methods: {
+        isaFavorite: function(id) {
+            return this.data.favorites.hasOwnProperty(id);
+        },
         getLocation: function() {
             if (typeof navigator !== "undefined" && typeof navigator.geolocation !== "undefined") {
-                log("Asking user to get their location");
+                console.log("Asking user to get their location");
                 navigator.geolocation.getCurrentPosition(position => {
                         this.geolocationCallback(position)
                     },
@@ -47,113 +63,77 @@ export default {
                         this.errorHandler(error)
                     });
             } else {
-                log("Your browser does not support the HTML5 Geolocation API, so this demo will not work.")
+                console.log("Your browser does not support the HTML5 Geolocation API, so this demo will not work.")
             }
         },
         geolocationCallback: function(location) {
             var latitude = location.coords.latitude;
             var longitude = location.coords.longitude;
-            log("Retrieved user's location: [" + latitude + ", " + longitude + "]");
+            console.log("Retrieved user's location: [" + latitude + ", " + longitude + "]");
 
             store.location = [latitude, longitude];
-            this.updateCenter([latitude, longitude]);
 
             // var username = "wesley";
             var username = firebase.auth().currentUser.uid;
 
             geoFire.set(username, [latitude, longitude]).then(function() {
-                log("Current user " + username + "'s location has been added to GeoFire");
+                console.log("Current user " + username + "'s location has been added to GeoFire");
                 // When the user disconnects from Firebase (e.g. closes the app, exits the browser),
                 // remove their GeoFire entry
                 // firebaseRef.child(username).onDisconnect().remove();
 
-                log("Added handler to remove user " + username + " from GeoFire when you leave this page.");
+                console.log("Added handler to remove user " + username + " from GeoFire when you leave this page.");
             }).catch(function(error) {
-                log("Error adding user " + username + "'s location to GeoFire");
+                console.log("Error adding user " + username + "'s location to GeoFire");
                 //sometimes this error when it's removing at setting at the same time
-            });
-        },
-        updateCenter: function(center, radius) {
-            if (!center) {
-                debugger;
-            }
-            console.log('updating center to: ', center);
-            geoQuery.updateCriteria({
-                center: center,
-                radius: 100
             });
         },
         errorHandler: function(error) {
             if (error.code == 1) {
-                log("Error: PERMISSION_DENIED: User denied access to their location");
+                console.log("Error: PERMISSION_DENIED: User denied access to their location");
             } else if (error.code === 2) {
-                log("Error: POSITION_UNAVAILABLE: Network is down or positioning satellites cannot be reached");
+                console.log("Error: POSITION_UNAVAILABLE: Network is down or positioning satellites cannot be reached");
             } else if (error.code === 3) {
-                log("Error: TIMEOUT: Calculating the user's location too took long");
+                console.log("Error: TIMEOUT: Calculating the user's location too took long");
             } else {
-                log("Unexpected error code")
+                console.log("Unexpected error code")
             }
         },
         getProfileInfo: function(profileToLookup) {
-            console.log('looking up profile: ', profileToLookup);
-            var profilesRef = firebase.database().ref('profiles/' + profileToLookup + '');
-            self = this;
-            profilesRef.on('value', function(snapshot) {
-                if (!snapshot.val()) {
-                    console.log('null data for ', self.profiles[snapshot.ref.key]);
-                    return;
-                }
-                console.log('data', snapshot.val());
-                // self.profiles[snapshot.ref.key] = Object.assign({}, self.profiles[snapshot.ref.key], snapshot.val())
-                var mergedData = Object.assign({}, self.profiles[snapshot.ref.key], snapshot.val());
-                //debugger;
-                Vue.set(self.profiles, snapshot.ref.key, mergedData)
+            // console.log('looking up profile: ', profileToLookup);
+            // var profilesRef = firebase.database().ref('profiles/' + profileToLookup + '');
+            // self = this;
+            // profilesRef.on('value', function(snapshot) {
+            //     if (!snapshot.val()) {
+            //         console.log('null data for ', self.profiles[snapshot.ref.key]);
+            //         return;
+            //     }
+            //     console.log('data', snapshot.val());
+            //     // self.profiles[snapshot.ref.key] = Object.assign({}, self.profiles[snapshot.ref.key], snapshot.val())
+            //     var mergedData = Object.assign({}, self.profiles[snapshot.ref.key], snapshot.val());
+            //     //debugger;
+            //     Vue.set(self.profiles, snapshot.ref.key, mergedData)
+            // });
+            var vm = this;
+            var keys = Object.keys(this.data.grid);
+            var promises = keys.map(function(key) {
+                return firebase.database().ref("/profiles/").child(key).once("value");
             });
-        },
-        init: function() {
-            var center = store.location || [0, 0];
-            var self = this;
-
-            geoQuery = geoFire.query({
-                center: center,
-                radius: 100.5
-            });
-
-
-            geoQueryGuyWatcher = geoQuery.on("key_entered", (key, location, distance) => {
-                console.log("Bicycle shop " + key + " found at " + location + " (" + distance + " km away)");
-                Vue.set(self.profiles, key, {
-                    distance: distance,
-                    uid: key
+            Promise.all(promises).then(function(snapshots) {
+                snapshots.forEach(function(snapshot) {
+                    var mergedData = Object.assign({}, vm.data.grid[snapshot.key], snapshot.val());
+                    Vue.set(vm.dudes, snapshot.key, {
+                        yup: 'asdf'
+                    });
+                    console.log('got data for', snapshot.key + ": ", snapshot.val());
                 });
-                self.getProfileInfo(key);
-            });
-            console.log('set a watcher');
-
-
-            geoQuery.on("key_exited", function(key, location, distance) {
-                console.log(key + " exited query to " + location + " (" + distance + " km from center)");
-                Vue.delete(self.profiles, key);
             });
 
-
-
-        }
+        },
     },
     created: function() {
         console.log('mounted');
-
-        this.init();
         this.getLocation();
-
-
-    },
-    destroyed: function() {
-        // geoQueryGuyWatcher.cancel();
-        // debugger;
-        console.log('destorying', geoQueryGuyWatcher);
-        geoQueryGuyWatcher.cancel();
-
     }
 }
 </script>

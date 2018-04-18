@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 
 import Hello from '@/components/Hello'
+import Grid from '@/components/Grid'
 import Login from '@/components/Login'
 import SignUp from '@/components/SignUp'
 import Profile from '@/components/Profile'
@@ -35,7 +36,8 @@ let router = new Router({
     {
       path: '/hello',
       name: 'Hello',
-      component: Hello,
+      component: Grid,
+      props: true,
       meta: {
         requiresAuth: true
       }
@@ -43,6 +45,7 @@ let router = new Router({
     {
       path: '/profile/',
       component: Profile,
+      props: true,
       meta: {
         requiresAuth: true
       }
