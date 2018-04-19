@@ -43,16 +43,23 @@ exports.saveUser = functions.database.ref('/geo/{pushId}')
     // var longitude = event.data.child('l/1');
     console.log('pushid', context.params.pushId);
     console.log("snapshot", snapshot);
-    console.log("context", context);
+  
+  			var profilesRef = admin.database().ref('/geo/' + context.params.pushId);
+            profilesRef.on('value', function(snapshot) {
+                console.log('data', snapshot.val());
 
-var latitude = 36.1000213;
-var longitude = -115.2065723;
+
+
+// var latitude = 36.1000213;
+// var longitude = -115.2065723;
 var distance = 100;
 
-				const geofireRef = admin.database().ref('geo');
+
+                const geofireRef = admin.database().ref('geo');
 				geoFire = new GeoFire(geofireRef);
 				const geoQuery = geoFire.query({
-                center: [Number(latitude), Number(longitude)],
+                // center: [Number(latitude), Number(longitude)],
+                center: snapshot.val().l,
                 radius: Number(distance)
                 });
 
@@ -69,11 +76,15 @@ var distance = 100;
                 geoQuery.cancel();
                 // timers.gotIdsFromGeofire = moment() - startTime;
                 // resolve(usersIDs)
-                console.log(usersIDs);
+                // console.log(usersIDs);
                   return admin.database().ref('/users/' + context.params.pushId + '/grid').set(usersIDs).then((snapshot) => {
-  	
-    // Redirect with 303 SEE OTHER to the URL of the pushed object in the Firebase console.
-    // return res.redirect(303, snapshot.ref.toString());
-  });
+				  	//pushes profiles that match into the users grid
+				  });
                 });
+
+            });
+
+
+
+				
   });
