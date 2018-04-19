@@ -21,7 +21,12 @@
     
     "profiles": {
       "$uid": {
-        ".write": "$uid === auth.uid"
+        ".write": "$uid === auth.uid",
+          "description":{
+            ".read":true,
+            ".write": "newData.val().length < 1024",
+            // ".validate": "!newData.val().contains('<')"
+          }
       }
     },
   

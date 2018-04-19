@@ -5,7 +5,7 @@
         <div class="messages" id="scrollingContent">
             <div v-for="message in messagesOrdered" class="message" :class="[message.sender == currentUser.uid ?  'me' : '']">
                 <template v-if="message.text">{{message.text}}</template>
-                <div :style="'background-image: url('+ message.image +');'" class="myGallery-image" v-if="message.image"></div>
+                <a :href="message.image" target="_blank"><div :style="'background-image: url('+ message.image +');'" class="myGallery-image" v-if="message.image"></div></a>
                 <template v-if="message.location">{{message.location}}</template>
             </div>
         </div>
@@ -413,6 +413,7 @@ export default {
     padding: .5rem 1rem;
     position: relative;
     border-bottom-left-radius: 0;
+    text-align: left;
 }
 
 .message.me {
