@@ -7,7 +7,7 @@
                 </div>
                 <div class="profile-bottom">
                     <h4>{{ profile.displayName }} <span class="age">{{profile.age}}</span></h4>
-                    <p class="description">{{ profile.description }}</p>
+                    <p class="description" v-html="descriptionFiltered"></p>
                 </div>
                 <div class="fab-container">
                     <router-link v-if="!isMyProfile" :to="'../chat/'+id" class="fab" tag="button"><span class="fas fa-comment-alt"></span></router-link>
@@ -83,6 +83,9 @@ export default {
         },
         favorites: function(){
             return this.$parent.data.favorites;
+        },
+        descriptionFiltered: function(){
+            return this.$options.filters.nl2br(this.profile.description);
         }
     },
     methods: {
