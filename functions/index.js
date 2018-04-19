@@ -38,20 +38,11 @@ exports.addMessage = functions.https.onRequest((req, res) => {
 //Trigger approach (no extra work on Android)
 exports.saveUser = functions.database.ref('/geo/{pushId}')
   .onWrite((snapshot, context) => {
-    // const user = event.data.val();
-    // var latitude = event.data.child('l/0');
-    // var longitude = event.data.child('l/1');
-    console.log('pushid', context.params.pushId);
-    console.log("snapshot", snapshot);
   
   			var profilesRef = admin.database().ref('/geo/' + context.params.pushId);
             profilesRef.on('value', function(snapshot) {
-                console.log('data', snapshot.val());
+                // console.log('data', snapshot.val());
 
-
-
-// var latitude = 36.1000213;
-// var longitude = -115.2065723;
 var distance = 100;
 
 

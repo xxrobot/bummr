@@ -1,8 +1,8 @@
 <template>
     <div class="container">
         <div class="conversations">
-            <div v-for="(conversation, key) in data.conversationPartners" class="message" v-if="conversation.lastMessage">
-                <router-link :to="'/chat/'+key" tag="div" class="conversation">
+            <div v-for="conversation in conversationPartnersOrdered" class="message" v-if="conversation.lastMessage">
+                <router-link :to="'/chat/'+conversation.otherPersonId" tag="div" class="conversation">
                     <div class="thumbnail" :style="'background-image: url('+ conversation.imagePrimary +');'">
                     </div>
                     <div class="messagemeta">
@@ -34,6 +34,11 @@ export default {
         },
         currentUser: function() {
             return firebase.auth().currentUser
+        },
+        conversationPartnersOrdered: function() {
+            var conversationsArr = this.data.conversationPartners;
+            return _.sortBy(conversationsArr,'lastMessageTime').reverse();
+            // return _.orderBy(this.data.conversationPartners, ['unseenCount'])
         }
     },
     methods: {
@@ -51,6 +56,7 @@ export default {
                 profileRef.on('value', function(snapshot) {
                     var mergedProfileData = Object.assign({}, vm.data.conversationPartners[profile], snapshot.val())
                     vm.$set(vm.data.conversationPartners, profile, mergedProfileData);
+                    vm.$set(vm.data.conversationPartners[profile], 'otherPersonId', profile);
                 });
 
                 //get last message from conversationid

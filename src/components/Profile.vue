@@ -79,7 +79,6 @@ export default {
             return this.id;
         },
         isFavorite: function(){
-            // return _(this.$parent.data.favorites).has(this.id);
             return this.data.favorites.hasOwnProperty(this.id);
         },
         favorites: function(){
